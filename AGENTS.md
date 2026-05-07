@@ -5,12 +5,7 @@ PlatformIO project for **ESP32** (`esp32dev` board, Arduino framework).
 
 ## Status
 - **UART communication**: Implemented (115200 baud, 8N1, 1024-byte RX buffer), pending STM32 hardware test
-- **Touch screen**: Implemented using Bodmer's `On_Off_Button.ino` logic:
-  - `tft.calibrateTouch()` with on-screen prompts at startup
-  - `tft.getTouch(&x, &y, 600)` threshold for noise filtering
-  - Glow effect: TFT_GREEN frame + `delay(400)` on press
-  - `drawStatusBar()` persists battery/Bluetooth icons on all screens
-  - Pending CYD hardware validation
+- **Touch screen**: Failed hardware - not needed
 - **Bluetooth icon**: Fixed (12x12 X, 1.8x vertical line, right-side connections only)
 - **3-way communication**: Code complete (BLE→UART→TFT), pending hardware validation
 - **Menu rotation**: Disabled per user request (no auto-rotate)
@@ -26,12 +21,11 @@ Build artifacts live in `.pio/` (gitignored).
 
 ## Hardware
 - **Display**: ST7789 240x320 via SPI — MISO=12, MOSI=13, SCLK=14, CS=15, DC=2, BL=21, RST=-1 (no reset pin)
-- **Touch**: XPT2046 via SPI — CS=33 (enabled via `TOUCH_CS=33` in `platformio.ini`)
 - **BLE**: advertises as `CYD_BLE_NODE` with a custom read/write/notify characteristic
 - **UART2**: RX=16, TX=17, 115200 baud, 1024-byte RX buffer — connects to STM32
 
 ## Architecture
-Single source file: `src/main.cpp`. Initializes TFT display, BLE GATT server, UART2, and touch. Implements 3-way bi-directional communication:
+Single source file: `src/main.cpp`. Initializes TFT display, BLE GATT server, and UART2. Implements 3-way bi-directional communication:
 - **BLE → UART**: Phone commands relayed to STM32 via Serial2
 - **UART → BLE**: STM32 data relayed to phone via BLE notifications
 - **UART → TFT**: `VAL:` prefixed strings update screen without flicker

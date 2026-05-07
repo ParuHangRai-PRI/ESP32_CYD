@@ -284,17 +284,6 @@ void setup() {
 }
 
 void loop() {
-    unsigned long now = millis();
-    if (currentScreen == SCREEN_MENU) {
-        if (now - lastRotateTime >= rotateInterval) {
-            int oldIndex = selectedIndex;
-            selectedIndex = (selectedIndex + 1) % MENU_ITEMS;
-            drawMenuItem(oldIndex, false);
-            drawMenuItem(selectedIndex, true);
-            lastRotateTime = now;
-        }
-    }
-
     if (deviceConnected != oldDeviceConnected) {
         if (!deviceConnected) {
             delay(1500);
