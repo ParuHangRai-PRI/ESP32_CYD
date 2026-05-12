@@ -193,10 +193,13 @@ class MyServerCallbacks : public BLEServerCallbacks
     void onConnect(BLEServer *pServer)
     {
         deviceConnected = true;
+        // Serial.println("BT connected");
+        Serial2.println("CTL:t1");
     }
     void onDisconnect(BLEServer *pServer)
     {
         deviceConnected = false;
+        Serial2.println("ECHO:BT disconnected");
     }
 };
 
@@ -209,7 +212,7 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
         std::string value = pCharacteristic->getValue();
         if (value.length() > 0)
         {
-            Serial.println(value.c_str());
+            Serial2.println(value.c_str());
         }
     }
 };
@@ -912,9 +915,9 @@ void updateQuickTest()
  * Receives VAL: and CTL: signals, forwards BLE commands to STM32 */
 void handleUart()
 {
-    while (Serial.available())
+    while (Serial2.available())
     {
-        char c = Serial.read();
+        char c = Serial2.read();
         if (c == '\n' || uartRxIndex >= sizeof(uartRxBuffer) - 1)
         {
             uartRxBuffer[uartRxIndex] = '\0';
@@ -948,8 +951,8 @@ void handleUart()
                     dateTimeVal = val.substring(2);
                     sensorValChanged = true;
                 }
-                Serial.print("ECHO:");
-                Serial.println(rxData);
+                Serial2.print("ECHO:");
+                Serial2.println(rxData);
             }
             else if (rxData.startsWith("CTL:"))
             {
@@ -975,15 +978,15 @@ void handleUart()
                 else if (ctl == "t3")
                     ctlTestTurb = true;
                 ctlReceived = true;
-                Serial.print("ECHO:");
-                Serial.println(rxData);
+                Serial2.print("ECHO:");
+                Serial2.println(rxData);
             }
             else if (pCharacteristic != nullptr && deviceConnected)
             {
                 pCharacteristic->setValue(rxData.c_str());
                 pCharacteristic->notify();
-                Serial.print("ECHO:");
-                Serial.println(rxData);
+                Serial2.print("ECHO:");
+                Serial2.println(rxData);
             }
             uartRxIndex = 0;
         }
@@ -1034,9 +1037,9 @@ void setup()
     pAdvertising->start();
 
     // Initialize UART0 (upload port) communication with STM32
-    Serial.begin(115200, SERIAL_8N1);
-    Serial.setRxBufferSize(1024);
-    Serial.println("ESP32 UART Ready");
+    Serial2.begin(115200, SERIAL_8N1, 16, 17);
+    Serial2.setRxBufferSize(1024);
+    Serial2.println("ESP32 UART Ready");
 
     delay(500);
     LCD_Backlight_CTL(12);
@@ -1191,27 +1194,27 @@ void loop()
         if (ctlTestAll)
         {
             ctlTestAll = false;
-            Serial.println("CTL:tst");
+            Serial2.println("CTL:tst");
         }
         if (ctlErase)
         {
             ctlErase = false;
-            Serial.println("CTL:er");
+            Serial2.println("CTL:er");
         }
         if (ctlTestTlf)
         {
             ctlTestTlf = false;
-            Serial.println("CTL:t1");
+            Serial2.println("CTL:t1");
         }
         if (ctlTestHlf)
         {
             ctlTestHlf = false;
-            Serial.println("CTL:t2");
+            Serial2.println("CTL:t2");
         }
         if (ctlTestTurb)
         {
             ctlTestTurb = false;
-            Serial.println("CTL:t3");
+            Serial2.println("CTL:t3");
         }
         ctlReceived = false;
     }
