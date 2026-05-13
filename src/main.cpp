@@ -911,6 +911,16 @@ void updateQuickTest()
     quickTestBarSprite.pushSprite(barX + 1, barY + 1);
 }
 
+/** Handles UART communication from UART0 */
+void handleUart0()
+{   
+    while (Serial.available())
+    {
+        char c = Serial.read();
+        Serial.print(c);
+    }
+}
+
 /** Handles UART communication with STM32
  * Receives VAL: and CTL: signals, forwards BLE commands to STM32 */
 void handleUart()
@@ -1037,9 +1047,13 @@ void setup()
     pAdvertising->start();
 
     // Initialize UART0 (upload port) communication with STM32
-    Serial2.begin(115200, SERIAL_8N1, 16, 17);
+    Serial2.begin(115200, SERIAL_8N1, 27, 22);
     Serial2.setRxBufferSize(1024);
     Serial2.println("ESP32 UART Ready");
+
+    Serial.begin(115200, SERIAL_8N1);
+    Serial.setRxBufferSize(1024);
+    Serial.println("ESP32 UART0 Ready");
 
     delay(500);
     LCD_Backlight_CTL(12);
@@ -1122,6 +1136,7 @@ void loop()
 
     // Handle UART communication (includes echo)
     handleUart();
+    handleUart0();
 
     // Process control signals from STM32 (input signals)
     if (ctlReceived)
