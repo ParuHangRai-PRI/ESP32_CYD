@@ -193,12 +193,13 @@ class MyServerCallbacks : public BLEServerCallbacks
     void onConnect(BLEServer *pServer)
     {
         deviceConnected = true;
-        // Serial.println("BT connected");
+        Serial.println("BT connected");
         Serial2.println("CTL:t1");
     }
     void onDisconnect(BLEServer *pServer)
     {
         deviceConnected = false;
+        Serial.println("ECHO:BT disconnected");
         Serial2.println("ECHO:BT disconnected");
     }
 };
@@ -917,7 +918,8 @@ void handleUart()
 {
     while (Serial.available())
     {
-        char c = Serial2.read();
+        char c = Serial.read();
+        Serial.write(c);
         if (c == '\n' || uartRxIndex >= sizeof(uartRxBuffer) - 1)
         {
             uartRxBuffer[uartRxIndex] = '\0';
@@ -951,8 +953,6 @@ void handleUart()
                     dateTimeVal = val.substring(2);
                     sensorValChanged = true;
                 }
-                Serial2.print("ECHO:");
-                Serial2.println(rxData);
             }
             else if (rxData.startsWith("CTL:"))
             {
@@ -978,15 +978,11 @@ void handleUart()
                 else if (ctl == "t3")
                     ctlTestTurb = true;
                 ctlReceived = true;
-                Serial2.print("ECHO:");
-                Serial2.println(rxData);
             }
             else if (pCharacteristic != nullptr && deviceConnected)
             {
                 pCharacteristic->setValue(rxData.c_str());
                 pCharacteristic->notify();
-                Serial2.print("ECHO:");
-                Serial2.println(rxData);
             }
             uartRxIndex = 0;
         }
@@ -1036,10 +1032,10 @@ void setup()
     pAdvertising->setScanResponse(true);
     pAdvertising->start();
 
-    // Initialize UART0 (upload port) communication with STM32
-    Serial2.begin(115200, SERIAL_8N1, 16, 17);
+    // Initialize UART communication with STM32
     Serial2.setRxBufferSize(1024);
-    Serial2.println("ESP32 UART Ready");
+    Serial2.begin(115200, SERIAL_8N1, 27, 22);
+    Serial2.println("ESP32 UART Ready (STM32)");
 
     delay(500);
     LCD_Backlight_CTL(12);
